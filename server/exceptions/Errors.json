@@ -1,0 +1,37 @@
+{
+    "1" : {
+        "msg" : "One or more empty fields",
+        "code" : 1
+    },
+    "2" : {
+        "msg" : "Invalid email",
+        "code" : 2
+    },
+    "3" :{
+        "msg" : "No such user",
+        "code":3
+    },
+    "4" :{
+        "msg" : "Wrong email or password",
+        "code" :4
+    },
+    "5" :{
+        "msg" : "No auth token provided",
+        "code": 5
+    },
+    "6" : {
+        "msg" : "invalid signature",
+        "code" : 6
+    },
+    "7" : {
+        "msg" : "jwt expired",
+        "code" : 7
+    },
+    "567" : {
+        "msg" : "jwt error",
+        "code" : 567
+    },
+    "23505" :{
+        "msg" : "duplicate key value violates unique constraint \"unique_email\""
+    }
+}

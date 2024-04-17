@@ -1,0 +1,23 @@
+version : '3'
+services :
+ nodeserver:
+  build:
+   context: .
+   dockerfile: ./Dockerfile
+  ports:
+   - 8080:8080
+  depends_on : 
+   - postgres
+ postgres:
+  image: postgres
+  environment:
+   POSTGRES_USER: postgres
+   POSTGRES_PASSWORD: postgres 
+   POSTGRES_DB: db
+  volumes:
+   - data:/var/lib/postgresql/data
+   - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  ports:
+   - 5433:5432
+volumes:
+ data:
