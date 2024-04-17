@@ -1,4 +1,4 @@
-### Important Note :
+# Important Note :
 The dockerfile file has a copy directive where it copies a .env file to the image when building which, for obvious reasons, is not included in this repo.  
 you have to make your own and it should include the following fields : 
 
