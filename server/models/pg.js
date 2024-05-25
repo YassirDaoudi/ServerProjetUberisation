@@ -1,7 +1,7 @@
 const {Pool} = require('pg')
 const env = process.env
 
-
+console.log(env.PORT);
 const pool = new Pool(
     {
         host : env.DBHOST,

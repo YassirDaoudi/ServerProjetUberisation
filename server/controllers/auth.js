@@ -5,11 +5,12 @@ const env = process.env
 
 const createJWT = (body) => {
     let jwToken = {
+        id:body.id,
         fullname: body.fullname,
         email: body.email,
         usertype: body.usertype
     }
-    return jwt.sign(jwToken, env.JWTPASS, { expiresIn: 60 * 60 })
+    return jwt.sign(jwToken, env.JWTPASS, { expiresIn: 86400 })
 }
 
 const login = function (req, res) {
@@ -51,7 +52,7 @@ const login = function (req, res) {
         let user = queryResult.rows[0]
         if (bcrypt.compareSync(req.body.password,user.password)) {
             return new Promise((resolve, _reject) => {
-                resolve()
+                resolve(user)
             })
         }else{
             return new Promise((_resolve, reject) => {
@@ -62,10 +63,10 @@ const login = function (req, res) {
             })
         }
     }
-    const makeJWTAndSendResp = ()=>{
+    const makeJWTAndSendResp = (result)=>{
         console.log("[INFO] : [controllers.auth.login.makeJWTAndSendResp] Successfully logged in ");
 
-        let jwToken = createJWT(req.body)
+        let jwToken = createJWT(result)
 
         res.json({
             status : "Ok",
@@ -74,6 +75,7 @@ const login = function (req, res) {
     }
     const OnError = (err) => {
         console.log(err.stack);
+        console.log("failed here");
         res.json({
             err: err.message,
             code: err.code
@@ -99,11 +101,11 @@ const register = function (req, res) {
             let err = new Error("Invalid email")
             err.code = 2
             res.status(400)
-            return new Promise((resolve, reject) => {
+            return new Promise((_resolve, reject) => {
                 reject(err)
             })
         }
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             resolve(body)
         })
     }
@@ -111,24 +113,24 @@ const register = function (req, res) {
     const pushToDb = (body) => {
         const hash = bcrypt.hashSync(body.password,10) 
         const parameters = [body.fullname, body.email, hash, body.usertype]
-        const sqlText = 'INSERT INTO users(fullname,email,password,usertype) VALUES ($1,$2,$3,$4)'
+        const sqlText = 'INSERT INTO users(fullname,email,password,usertype) VALUES ($1,$2,$3,$4) RETURNING id,fullname,email,usertype'
         return pool.query(sqlText, parameters)
     }
     
-    const getAnswer = (dbAnswer)=>{
-        return new Promise((rsv,rjt)=>{
-            rsv({body:req.body,dbAnswer})
-        })
-    }
+    // const getAnswer = (dbAnswer)=>{
+    //     return new Promise((rsv,rjt)=>{
+    //         rsv({body:req.body,dbAnswer})
+    //     })
+    // }
 
     const makeJWT = (answer) => {
-        let jwtString = createJWT(answer.body)
+        let jwtString = createJWT(answer.rows[0])
         answer.jwt = jwtString
         return answer
     }
 
     const sendAndLogResult = (answer) => {
-        const affRows = answer.dbAnswer.rowCount
+        const affRows = answer.rowCount
         console.log("[INFO] : [controllers.auth.register.sendAndLogResult] Affected Rows :" + affRows);
         res.json({
             affected_rows: affRows,
@@ -146,7 +148,7 @@ const register = function (req, res) {
 
     checkBody(req.body)
         .then(pushToDb)
-        .then(getAnswer)
+      //  .then(getAnswer)
         .then(makeJWT)
         .then(sendAndLogResult)
         .catch(OnError)
