@@ -1,6 +1,6 @@
-const { Socket } = require("socket.io");
 const { pool } = require("../models/pg");
 const UserSocketMap = require("./socketsUsersMap");
+const { onDisconnect } = require("./onDisconnect");
 
 const findUnsentMessagesAndSendThem = (socket) => {
     const user = socket.request.decodedjwt;
@@ -62,7 +62,10 @@ const onConnection = (socket) => {
         
             {
                 messages : [
-                    {},
+                    {
+                        content : "",
+                        disc_id : number
+                    },
                     {},
                     .
                     .
@@ -162,6 +165,9 @@ const onConnection = (socket) => {
             });
         }
     });
+    socket.on("disconnect",()=>{
+        onDisconnect(socket)
+    })
 };
 
 module.exports = { onConnection };

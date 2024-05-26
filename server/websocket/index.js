@@ -7,6 +7,6 @@ module.exports = (server)=>{
 
     io.use(jwtCheck)
     io.on("connection",onConnection)
-// need to add on disconnect to clean up the hashh map
+
 
 }
