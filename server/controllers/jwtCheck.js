@@ -1,7 +1,9 @@
 const jwt = require("jsonwebtoken")
 
-const jwtCheck = function (req, res, next) {
-    if (!req.body.auth) {
+const jwtCheck = function (req , res, next) {
+    let auth = (req.body.auth)? req.body.auth : req.headers.authorization;
+
+    if (!auth) {
         res.json({
             err: "No auth token provided",
             code: 5
@@ -9,7 +11,7 @@ const jwtCheck = function (req, res, next) {
     } else {
         try {
             console.log(req.originalUrl);
-            let decodedjwt = jwt.verify(req.body.auth, process.env.JWTPASS)
+            let decodedjwt = jwt.verify(auth, process.env.JWTPASS)
             req.body.decodedjwt = decodedjwt
             console.log(decodedjwt);
             next()

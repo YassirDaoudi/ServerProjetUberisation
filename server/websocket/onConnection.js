@@ -11,7 +11,16 @@ const findUnsentMessagesAndSendThem = (socket) => {
         return pool.query(sql, [user.id]);
     };
     const sendAll = (data) => {
-        const messages = data.rows;
+        const messages = data.rows.map((message)=>{
+            try {
+                let pr = JSON.parse(message.content)
+                message.projectRequest = pr
+                return message
+            } catch (error) {
+                return message
+            }
+        })
+        
         if (messages.length != 0) socket.emit("messages", messages);
     };
     findUnsent(user)
@@ -114,6 +123,11 @@ const onConnection = (socket) => {
                 .then((data) => {
                     let receiver = data.rows[0].receiver;
                     element.id = data.rows[0].id;
+                    try {
+                        let pr = JSON.parse(element.content)
+                        element.projectRequest = pr
+                    } catch (error) {
+                    }
                     if (UserSocketMap.get(receiver) != undefined) {
                         socket.to(UserSocketMap.get(receiver)).emit("messages", element);
                     }
