@@ -87,6 +87,7 @@ const onConnection = (socket) => {
         const sender = user.id;
 
         sent_messages.messages.forEach((element) => {
+            console.log("pppp");
             // do some checking here like if the sender is allowed to message the receiver
             //also check for missing fields in the message object
             let disc_id = element.disc_id;
@@ -129,7 +130,7 @@ const onConnection = (socket) => {
                     } catch (error) {
                     }
                     if (UserSocketMap.get(receiver) != undefined) {
-                        socket.to(UserSocketMap.get(receiver)).emit("messages", element);
+                        socket.to(UserSocketMap.get(receiver)).emit("messages", [element]);
                     }
                 })
                 .catch((err) => {

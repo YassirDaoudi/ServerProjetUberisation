@@ -61,6 +61,17 @@ const generator = (objectType)=>{
         return query(sql)
         .then(res=>{ return res})
     }
-    return {insert,updateById,deleteById,getAll}
+    const getAllBy = (columns,byfield,value)=>{
+        let usedCols;
+        if (columns != undefined) {
+            usedCols = columns.join(",")
+        }else{
+            usedCols ="*"
+        }
+        let sql = "SELECT "+usedCols+" FROM "+objectType.tableName+" where "+byfield+"=$1;"
+        return query(sql,[value])
+        .then(res=>{ return res})
+    }
+    return {insert,updateById,deleteById,getAll,getAllBy}
 }
 module.exports = {generator}

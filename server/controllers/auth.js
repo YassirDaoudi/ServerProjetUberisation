@@ -70,7 +70,9 @@ const login = function (req, res) {
 
         res.json({
             status : "Ok",
-            jwt : jwToken
+            jwt : jwToken,
+            usertype : result.usertype,
+            id :  result.id,
         })
     }
     const OnError = (err) => {
@@ -134,7 +136,9 @@ const register = function (req, res) {
         console.log("[INFO] : [controllers.auth.register.sendAndLogResult] Affected Rows :" + affRows);
         res.json({
             affected_rows: affRows,
-            jwt: answer.jwt
+            jwt: answer.jwt,
+            usertype : answer.usertype,
+            id : answer.id
         })
     }
 

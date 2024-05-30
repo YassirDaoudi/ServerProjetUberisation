@@ -1,4 +1,5 @@
 const crud = require('../models/Designers')
+const { pool } = require('../models/pg')
 /**
  * 
  * @param {import('express').Request} req 
@@ -9,19 +10,23 @@ const getAll = (req, res) => {
 
     //get function from model 
     let getAll = crud.getAll
-    getAll().then(r => { res.json(r) })
+    pool.query("SELECT *    FROM users    JOIN designers ON users.id = designers.user_id;")
+        .then(r => {
+            r.rows.forEach((u) => {u.password = '' })
+            res.json(r.rows)
+        })
 }
 /**
  * 
  * @param {import('express').Request} req 
  * @param {import('express').Response} res 
  */
-const insert = (req,res) =>{
+const insert = (req, res) => {
     //check if body isnt empty 
     let body = req.body
     //get function from model 
     let insert = crud.insert
-    insert([body.user_id,body.profile_pic,body.description]).then(r => { res.json({status: r}) })
+    insert([body.user_id, body.profile_pic, body.description]).then(r => { res.json({ status: r }) })
 }
 
-module.exports = { getAll,insert }
+module.exports = { getAll, insert }
