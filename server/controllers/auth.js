@@ -112,7 +112,7 @@ const register = function (req, res) {
         })
     }
 
-    const pushToDb = (body) => {
+    const pushToDb =(body) => {
         const hash = bcrypt.hashSync(body.password,10) 
         const parameters = [body.fullname, body.email, hash, body.usertype]
         const sqlText = 'INSERT INTO users(fullname,email,password,usertype) VALUES ($1,$2,$3,$4) RETURNING id,fullname,email,usertype'
@@ -125,7 +125,13 @@ const register = function (req, res) {
     //     })
     // }
 
-    const makeJWT = (answer) => {
+    const makeJWT = async (answer) => {
+        if (answer.rows[0].usertype == "client") {
+            
+            await pool.query("Insert into "+answer.rows[0].usertype+"s(user_id) values ($1)",[answer.rows[0].id])
+        }else{
+            await pool.query("Insert into "+answer.rows[0].usertype+"s(user_id,description) values ($1,$2)",[answer.rows[0].id,"desc"])
+        }
         let jwtString = createJWT(answer.rows[0])
         answer.jwt = jwtString
         return answer
@@ -134,11 +140,12 @@ const register = function (req, res) {
     const sendAndLogResult = (answer) => {
         const affRows = answer.rowCount
         console.log("[INFO] : [controllers.auth.register.sendAndLogResult] Affected Rows :" + affRows);
+        console.log(JSON.stringify(answer.usertype));
         res.json({
             affected_rows: affRows,
             jwt: answer.jwt,
-            usertype : answer.usertype,
-            id : answer.id
+            usertype : answer.rows[0].usertype,
+            id : answer.rows[0].id
         })
     }
 

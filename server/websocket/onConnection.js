@@ -11,7 +11,7 @@ const findUnsentMessagesAndSendThem = (socket) => {
         return pool.query(sql, [user.id]);
     };
     const sendAll = (data) => {
-        const messages = data.rows.map((message)=>{
+        const messages = data.rows.map((message) => {
             try {
                 let pr = JSON.parse(message.content)
                 message.projectRequest = pr
@@ -20,7 +20,7 @@ const findUnsentMessagesAndSendThem = (socket) => {
                 return message
             }
         })
-        
+
         if (messages.length != 0) socket.emit("messages", messages);
     };
     findUnsent(user)
@@ -48,7 +48,7 @@ const findUnsentAcksAndSendThem = (socket) => {
         }
         // delete from unsent table
         let sql = "DELETE FROM unsent_updates where message_id in (SELECT id FROM messages WHERE sender =$1 ) "
-        pool.query(sql,[user.id])
+        pool.query(sql, [user.id])
     };
     findUnsent(user)
         .then(sendAll)
@@ -86,59 +86,64 @@ const onConnection = (socket) => {
     socket.on("messages", (sent_messages) => {
         const sender = user.id;
 
-        sent_messages.messages.forEach((element) => {
-            console.log("pppp");
-            // do some checking here like if the sender is allowed to message the receiver
-            //also check for missing fields in the message object
-            let disc_id = element.disc_id;
-            let getDiscussionSql = "SELECT * FROM discussions where id=$1";
-            pool
-                .query(getDiscussionSql, [disc_id])
-                .then((data) => {
-                    let result = data.rows[0];
-                    if (result == undefined) {
-                        return new Promise((resolve, reject) => {
-                            reject(new Error("no such discussion"));
-                        });
-                    }
 
-                    let receiver;
+        if (sent_messages.messages != undefined) {
+            sent_messages.messages.forEach((element) => {
+                console.log("pppp");
+                // do some checking here like if the sender is allowed to message the receiver
+                //also check for missing fields in the message object
+                let disc_id = element.disc_id;
+                let getDiscussionSql = "SELECT * FROM discussions where id=$1";
+                pool
+                    .query(getDiscussionSql, [disc_id])
+                    .then((data) => {
+                        let result = data.rows[0];
+                        if (result == undefined) {
+                            return new Promise((resolve, reject) => {
+                                reject(new Error("no such discussion"));
+                            });
+                        }
 
-                    if (user.usertype == "client") {
-                        receiver = result.designer_id;
-                    } else {
-                        receiver = result.client_id;
-                    }
-                    let insertMessagesIntoDbSQL =
-                        "INSERT INTO messages (content,timestamp,disc_id,sender,receiver,status) VALUES ($1,$2,$3,$4,$5,$6) Returning id,content,timestamp,disc_id,sender,receiver,status";
-                    return pool.query(insertMessagesIntoDbSQL, [
-                        element.content,
-                        Date.now(),
-                        element.disc_id,
-                        sender,
-                        receiver,
-                        "sent",
-                    ]);
-                })
+                        let receiver;
 
-                .then((data) => {
-                    let receiver = data.rows[0].receiver;
-                    element.id = data.rows[0].id;
-                    let messageToBeSent = data.rows[0]
-                    try {
-                        let pr = JSON.parse(element.content)
-                        messageToBeSent.projectRequest = pr
-                    } catch (error) {
-                    }
-                    if (UserSocketMap.get(receiver) != undefined) {
-                        socket.to(UserSocketMap.get(receiver)).emit("messages", [messageToBeSent]);
-                    }
-                })
-                .catch((err) => {
-                    // ill do error management if i can spare some time i promise
-                    console.log(err.stack);
-                });
-        });
+                        if (user.usertype == "client") {
+                            receiver = result.designer_id;
+                        } else {
+                            receiver = result.client_id;
+                        }
+                        let insertMessagesIntoDbSQL =
+                            "INSERT INTO messages (content,timestamp,disc_id,sender,receiver,status) VALUES ($1,$2,$3,$4,$5,$6) Returning id,content,timestamp,disc_id,sender,receiver,status";
+                        return pool.query(insertMessagesIntoDbSQL, [
+                            element.content,
+                            Date.now(),
+                            element.disc_id,
+                            sender,
+                            receiver,
+                            "sent",
+                        ]);
+                    })
+
+                    .then((data) => {
+                        let receiver = data.rows[0].receiver;
+                        element.id = data.rows[0].id;
+                        let messageToBeSent = data.rows[0]
+                        try {
+                            let pr = JSON.parse(element.content)
+                            messageToBeSent.projectRequest = pr
+                        } catch (error) {
+                        }
+                        if (UserSocketMap.get(receiver) != undefined) {
+                            socket.to(UserSocketMap.get(receiver)).emit("messages", [messageToBeSent]);
+                        }
+                    })
+                    .catch((err) => {
+                        // ill do error management if i can spare some time i promise
+                        console.log(err.stack);
+                    });
+            });
+        }else{
+            console.log("bad message format");
+        }
     });
 
 
@@ -181,7 +186,7 @@ const onConnection = (socket) => {
             });
         }
     });
-    socket.on("disconnect",()=>{
+    socket.on("disconnect", () => {
         onDisconnect(socket)
     })
 };

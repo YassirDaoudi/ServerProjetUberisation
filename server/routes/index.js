@@ -10,4 +10,6 @@ module.exports = function (app){
     require('./messages')(router)
     require('./discussions')(router)
     require('./projects')(router)
+    require("./tasks")(router)
+
 }
