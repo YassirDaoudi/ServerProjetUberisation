@@ -10,7 +10,7 @@ const createJWT = (body) => {
         email: body.email,
         usertype: body.usertype
     }
-    return jwt.sign(jwToken, env.JWTPASS, { expiresIn: 86400 })
+    return jwt.sign(jwToken, env.JWTPASS, { expiresIn: 8640000 })
 }
 
 const login = function (req, res) {

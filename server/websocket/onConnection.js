@@ -110,7 +110,7 @@ const onConnection = (socket) => {
                         receiver = result.client_id;
                     }
                     let insertMessagesIntoDbSQL =
-                        "INSERT INTO messages (content,timestamp,disc_id,sender,receiver,status) VALUES ($1,$2,$3,$4,$5,$6) Returning id,receiver";
+                        "INSERT INTO messages (content,timestamp,disc_id,sender,receiver,status) VALUES ($1,$2,$3,$4,$5,$6) Returning id,content,timestamp,disc_id,sender,receiver,status";
                     return pool.query(insertMessagesIntoDbSQL, [
                         element.content,
                         Date.now(),
@@ -124,13 +124,14 @@ const onConnection = (socket) => {
                 .then((data) => {
                     let receiver = data.rows[0].receiver;
                     element.id = data.rows[0].id;
+                    let messageToBeSent = data.rows[0]
                     try {
                         let pr = JSON.parse(element.content)
-                        element.projectRequest = pr
+                        messageToBeSent.projectRequest = pr
                     } catch (error) {
                     }
                     if (UserSocketMap.get(receiver) != undefined) {
-                        socket.to(UserSocketMap.get(receiver)).emit("messages", [element]);
+                        socket.to(UserSocketMap.get(receiver)).emit("messages", [messageToBeSent]);
                     }
                 })
                 .catch((err) => {

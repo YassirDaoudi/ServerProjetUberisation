@@ -8,4 +8,6 @@ module.exports = function (app){
     require('./jwt')(router)
     require('./designers')(router)
     require('./messages')(router)
+    require('./discussions')(router)
+    require('./projects')(router)
 }

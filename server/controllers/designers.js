@@ -28,5 +28,10 @@ const insert = (req, res) => {
     let insert = crud.insert
     insert([body.user_id, body.profile_pic, body.description]).then(r => { res.json({ status: r }) })
 }
+const getbydiscid = (req,res)=>{
+    const getfromdb = ()=>{
+        let sql = "select * from "
+    }
+}
 
 module.exports = { getAll, insert }
